@@ -5,15 +5,40 @@
         <Sequence>
             <RetryUntilSuccessful num_attempts="1000">
                 <Sequence>
-                    <Condition ID="IsDetected" confidence="0.4"
-                                            interest="person"
-                                            max_depth="6"
-                                            max_entities="1"
-                                            order="depth"
-                                            best_detection="{best_detection}"
-                                            cam_frame="head_front_camera_rgb_optical_frame"/>
-                    <Action ID="ExtractPersonDescription" person_id="{best_detection}" interest="{interest}" description="{result}"/>
-                    <Action ID="Speak" say_text="The person is " param="{result}"/>
+                    <RetryUntilSuccessful num_attempts="-1">
+                        <Sequence>
+                            <ReactiveFallback>
+                                <Condition ID="IsDetected" 
+                                    confidence="0.6" 
+                                    interest="person"
+                                    max_depth="3.0" 
+                                    max_entities="2"
+                                    order="depth"
+                                    best_detection="{best_detection_global}"/>
+                                <Action ID="MoveAlongAxis" 
+                                        speed="0.2"
+                                        distance="6.28"
+                                        axis="z"/>
+                            </ReactiveFallback>
+                        </Sequence>
+                    </RetryUntilSuccessful>
+                    <Action ID="CheckPolicy" question="<__media__>
+                                                        Start the answer with: 'the person is'.
+
+                                                        Describe the person focusing mainly on their body posture, gestures, and current action.
+                                                        Prioritize:
+                                                        - body pose (standing, sitting, lying),
+                                                        - arm gestures (e.g., pointing left/right, waving, raising an arm),
+                                                        - what the person is doing or expressing.
+
+                                                        Also include 1–2 brief physical details (e.g., clothing color or hair), but do NOT focus too much on appearance.
+
+                                                        Use natural language only.
+                                                        Do NOT output JSON, lists, or bullet points.
+                                                        Return ONE single concise sentence."
+                                        output_text="{description}"
+                                        image_topic="/all_perceptions"/>
+                    <Action ID="Speak" say_text="So, " param="{description}"/>
                 </Sequence>
             </RetryUntilSuccessful>
         </Sequence>

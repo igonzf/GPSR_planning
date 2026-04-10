@@ -3,7 +3,7 @@
     <!-- ////////// -->
     <BehaviorTree ID="FindPersonTree">
         <Sequence>
-            <Action ID="SetPerceptionModel" model_type="keypoint"/>
+            <Action ID="SwitchYoloModel" model="yolov8n-pose"/>
             <Action ID="SetHeadJointPosition" vertical="-0.15"/>
             <Action ID="SetTorsoHeight" height="0.1"/>
 
@@ -11,8 +11,11 @@
                 <Sequence>
                     <ReactiveFallback>
                         <!-- <Condition ID="IsGesturing" type="{gesture}" person_id="{person_id}"/> -->
-                        <Condition ID="IsDetected" color="{color}" gesture="{arm_gesture}" pose="{body_position}" cam_frame="head_front_camera_rgb_optical_frame" confidence="0.3" person_id="{person_id}" interest="person" max_depth="2.5" max_entities="1" order="color"/>
-                        <Action ID="Rotate" angle="0.15" speed='0.3'/>
+                        <Condition ID="IsDetected" color="{color}" gesture="{arm_gesture}" pose="{body_position}" confidence="0.3" person_id="{person_id}" interest="person" max_depth="2.5" max_entities="1" order="color"/>
+                        <Action ID="MoveAlongAxis" 
+                        speed="0.5"
+                        distance="6.28"
+                        axis="z"/>
                     </ReactiveFallback>
                 <!-- TODO Si se hace el MoveTo, añadir el FilterEntity-->
                 <Action ID="Speak" say_text="I found you." param=""/>

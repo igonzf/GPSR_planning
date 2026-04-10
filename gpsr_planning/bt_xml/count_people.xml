@@ -6,14 +6,17 @@
             <Action ID="SetBlackboardInt" output_key="result_int" value="0"/>
             <Repeat num_cycles="4">
                 <Sequence>
-                    <Action ID="SetPerceptionModel" model_type="object"/>
+                    <Action ID="SwitchYoloModel" model="yolov8n-pose"/>
                     <Delay delay_msec="1000">
-                        <Action ID="Rotate" angle="1.57" speed='0.3' />
+                        <Action ID="MoveAlongAxis" 
+                        speed="0.5"
+                        distance="6.28"
+                        axis="z"/>
                     </Delay>
-                    <Condition ID="CountPeople" confidence="0.6" cam_frame="head_front_camera_rgb_optical_frame" max_entities="15" gesture="{arm_gesture}" color="{color}" pose="{body_posture}" input_num_person="{result}" num_person="{result}" />
+                    <Condition ID="CountPeople" confidence="0.6" cam_frame="head_front_camera_color_optical_frame" max_entities="15" gesture="{arm_gesture}" color="{color}" pose="{body_posture}" input_num_person="{result}" num_person="{result}" />
                 </Sequence>
             </Repeat>
-            <SetBlackboard output_key="result" value="{result_int}"/>
+            <!-- <SetBlackboard output_key="result" value="{result_int}"/> -->
             <Action ID="Speak" say_text="I have detected " param="{result}" />
         </Sequence>
     </BehaviorTree>

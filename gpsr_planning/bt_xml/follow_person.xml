@@ -3,56 +3,65 @@
     <!-- ////////// -->
     <BehaviorTree ID="FollowPersonTree">
         <Sequence>
-            <Action ID="SetPerceptionModel" model_type="object"/>
+            <Action ID="SwitchYoloModel" model="yolov11n"/>
             <Action ID="Speak" param="" say_text="Now i will follow you. Please stop at the end "/>
             <RetryUntilSuccessful num_attempts="-1">
-                <Condition ID="IsDetected" cam_frame="head_front_camera_rgb_optical_frame" confidence="0.6" frames="{frames}" interest="person" max_depth="5" max_entities="1" order="depth"/>
+                <Condition ID="IsDetected" 
+                    confidence="0.6" 
+                    interest="person"
+                    max_depth="3.0" 
+                    max_entities="2"
+                    order="depth"
+                    best_detection="{best_detection_global}"/>
             </RetryUntilSuccessful>
-            <Action ID="FilterEntity" frame="person_0" lambda="0.1"/>
-            <ReactiveSequence>
-                <Action ID="LookAt" tf_frame="person_0_filtered" />
-            </ReactiveSequence>
+            <Action ID="RemoveStringPrefix" string_to_remove="{best_detection_global}" prefix="person_" result="{id}"/>
+            <Action ID="SetPersistentId" id="{id}"/>
             <RetryUntilSuccessful num_attempts="-1">
                 <Sequence>
                     <Fallback>
                         <ReactiveSequence>
                             <RetryUntilSuccessful num_attempts="-1">
-                                <Condition ID="IsDetected" cam_frame="head_front_camera_rgb_optical_frame" 
-                                                           confidence="0.6" 
-                                                           person_id="{person_id}"
-                                                           interest="person"
-                                                           max_depth="3.0" 
-                                                           max_entities="2"
-                                                           order="depth"/>
+                                <Condition ID="IsDetected" 
+                                                        confidence="0.6" 
+                                                        interest="person"
+                                                        max_depth="3.0" 
+                                                        max_entities="2"
+                                                        order="depth"/>
                             </RetryUntilSuccessful>
-                            <Action ID="FilterEntity" frame="person_0" lambda="0.1"/>
-                            <Action ID="LookAt" tf_frame="person_0_filtered"/>
+                            <!-- <Action ID="FilterEntity" frame="{best_detection}" lambda="0.1"/> -->
+                            <!-- <Action ID="AddStringSuffix" string_to_modify="{best_detection}" suffix="_filtered" result="{filtered_frame}"/> -->
+                            <Action ID="LookAt" tf_frame="{best_detection_global}"/>
 
                             <Condition ID="IsEntityMoving" distance_tolerance="0.6"
-                                                           robot_distance_to_person="1.5"
-                                                           frame="person_0_filtered"
-                                                           check_time="8.0"/>
-                            <Action ID="FollowEntity" camera_frame="head_front_camera_rgb_optical_frame"
-                                                      distance_tolerance="0.2"
-                                                      frame_to_follow="person_0_filtered"
-                                                      x_axis_max="{max_x}"
-                                                      x_axis_min="{min_x}"
-                                                      y_axis_max="{max_y}"
-                                                      y_axis_min="{min_y}"/>
+                                                        robot_distance_to_person="1.5"
+                                                        frame="{best_detection_global}"
+                                                        check_time="8.0"/>
+                            <Action ID="FollowEntity" camera_frame="head_front_camera_optical_frame"
+                                                    distance_tolerance="0.2"
+                                                    frame_to_follow="{best_detection_global}"
+                                                    x_axis_max="20.0"
+                                                    x_axis_min="-20.0"
+                                                    y_axis_max="20.0"
+                                                    y_axis_min="-20.0"/>
                         </ReactiveSequence>
                         <Action ID="Speak" param="" say_text="have we arrived to the destination?"/>
                     </Fallback>
                     <ReactiveSequence>
                         <RetryUntilSuccessful num_attempts="-1">
-                            <Condition ID="IsDetected" cam_frame="head_front_camera_rgb_optical_frame" confidence="0.3" person_id="{person_id}" interest="person" max_depth="2.5" max_entities="1" order="color"/>
+                            <Condition ID="IsDetected" confidence="0.3" 
+                                                        interest="person" 
+                                                        max_depth="2.5" 
+                                                        max_entities="1" 
+                                                        order="color"/>
                         </RetryUntilSuccessful>
-                        <Action ID="FilterEntity" frame="person_0" lambda="0.1"/>
-                        <Action ID="LookAt" tf_frame="person_0_filtered"/>
+                        <!-- <Action ID="FilterEntity" frame="{best_detection}" lambda="0.1"/> -->
+                        <!-- <Action ID="AddStringSuffix" string_to_modify="{best_detection}" suffix="_filtered" result="{best_detection}"/> -->
+                        <Action ID="LookAt" tf_frame="{best_detection_global}"/>
                         <ForceSuccess>
                             <Action ID="GoalPublisher" 
-                            camera_frame="base_footprint"
-                            distance_tolerance="0.8"
-                            frame_to_follow="person_0_filtered"/>  
+                            camera_frame="head_front_camera_optical_frame"
+                            distance_tolerance="0.2"
+                            frame_to_follow="{best_detection_global}"/>  
                         </ForceSuccess>
                         <Action ID="DialogConfirmation"/>
                     </ReactiveSequence>

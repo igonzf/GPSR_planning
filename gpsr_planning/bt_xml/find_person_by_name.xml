@@ -17,13 +17,16 @@
                                 <Action ID="Sleep" time="1.0"/>
                             </ForceFailure>
                             <ForceFailure>
-                                <Condition ID="IsDetected" cam_frame="head_front_camera_rgb_optical_frame" confidence="0.7" person_id="{person_id}" interest="person" max_depth="2.0" max_entities="5" order="depth" frames="{new_frames}"/>
+                                <Condition ID="IsDetected" confidence="0.7" person_id="{person_id}" interest="person" max_depth="2.0" max_entities="5" order="depth_nearest" frames="{new_frames}"/>
                             </ForceFailure>
                             <ForceFailure>
                                 <Action ID="FilterPrevDetections" prev_detections="{prev_frames}" new_detections="{new_frames}" margin="1.0" frame_id="map"/>
                             </ForceFailure>
                             <ForceFailure>
-                                <Action ID="Rotate" angle="1.047" speed='0.3'/>
+                                <Action ID="MoveAlongAxis" 
+                                    speed="0.5"
+                                    distance="6.28"
+                                    axis="z"/>
                             </ForceFailure>
                         </Fallback>
                     </Sequence>
