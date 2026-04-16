@@ -49,9 +49,12 @@ class GpsrPlanner:
 
         self.llm = ChatLlamaROS(
             temp=0.60,
+            top_p=0.8,
+            top_k=20,
+            min_p=0,
             grammar_schema=self.grammar_schema
         )
-        
+
         is_lora_added = False
 
         chat_prompt_template = ChatPromptTemplate.from_messages([
@@ -84,6 +87,9 @@ class GpsrPlanner:
                 "- For commands such as counting, finding, describing, inspecting, answering about, or interacting with people or objects in a room, first move to that room if needed.\n"
                 "- For commands asking to report back to the user, return to the instruction point before speaking unless the command clearly specifies another destination.\n"
                 "- If they don't give a location, you don't have to move."
+
+                # "Use the move_to action before each action that requires changing the waypoint and remember your current waypoint. "
+                # "Answer only to the arguments you are asked for. "
                 "Today is {day}, tomorrow is {tomorrow} and the time is {time_h}. "
                 # "You start at the instruction point. "
                 "\n\n"
@@ -124,8 +130,6 @@ class GpsrPlanner:
             "tomorrow": tomorrow,
             "time_h": time_h
         })
-        
-        print(response)
 
         return json.loads(response), prompt
 
@@ -158,9 +162,12 @@ class GpsrPlanner:
                     action_args['properties'][arg] = {"type": robot_act["args"][arg]["type"]}
                     action_args['required'].append(arg)
                     if "choices" in robot_act["args"][arg]:
-                        action_args["properties"][arg]["enum"] = robot_act["args"][arg]["choices"]                
+                        action_args["properties"][arg]["enum"] = robot_act["args"][arg]["choices"]
+                if 'result_key_required' in robot_act and robot_act['result_key_required']:
+                    action_args['properties']['result_key'] = {"type": "string"}
+                    action_args['required'].append('result_key')
                 
-            elif robot_act['arg_case'] == 'anyOf' and robot_act['name'] == 'find_object':
+            elif robot_act['name'] == 'find_object':
                 action_args['oneOf'] = []
                 
                 item_list = {'item': ['category', 'specific_item'], 'category': ['category'], 'none': []}
@@ -171,16 +178,24 @@ class GpsrPlanner:
                     args_obj[arg] = {"type": robot_act["args"][arg]["type"], "enum": robot_act["args"][arg]["choices"]}
                 
                 for item, size in product(list(item_list.keys()), size_list):
-                    action_args['oneOf'].append({
+                    action_to_add = {
                         "properties": {k: args_obj[k] for k in [*item_list[item], size]},
-                        "required": item_list[item]
-                    })
-                
+                        "required": list(item_list[item])
+                    }
+                    if 'result_key_required' in robot_act and robot_act['result_key_required']:
+                        action_to_add['properties']['result_key'] = {"type": "string"}
+                        action_to_add['required'].append('result_key')
+                    action_args['oneOf'].append(action_to_add)
+
             elif robot_act['arg_case'] == 'anyOf':
                 for arg in robot_act["args"]:
                     action_args['properties'][arg] = {"type": robot_act["args"][arg]["type"]}
                     if "choices" in robot_act["args"][arg]:
                         action_args["properties"][arg]["enum"] = robot_act["args"][arg]["choices"]
+
+                if 'result_key_required' in robot_act and robot_act['result_key_required']:
+                    action_args['properties']['result_key'] = {"type": "string"}
+                    action_args['required'].append('result_key')
 
             elif robot_act['arg_case'] == 'oneOf':
                 action_args['oneOf'] = []
@@ -210,6 +225,10 @@ class GpsrPlanner:
                             'type': 'boolean'
                         }
                         option_obj['required'].append(search_by_option)
+                    
+                    if 'result_key_required' in robot_act and robot_act['result_key_required']:
+                        option_obj['properties']['result_key'] = {"type": "string"}
+                        option_obj['required'].append('result_key')
                 
                     action_args['oneOf'].append(option_obj)
             

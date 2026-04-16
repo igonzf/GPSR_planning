@@ -75,9 +75,6 @@ class GpsrPlanningNode(Node):
             action_element.setAttribute("__shared_blackboard", "true")
 
             for arg_key in action_args:
-                if arg_key == "search_by":
-                    continue
-                
                 arg_value = str(action_args[arg_key])
 
                 blackboard_set = bt_xml.createElement("SetBlackboard")

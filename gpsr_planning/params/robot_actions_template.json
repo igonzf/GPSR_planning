@@ -19,7 +19,8 @@
             }
         },
         "arg_case": "oneOf",
-        "description": "count objects using either a category or a specific item in a waypoint. This action has a result to tell."
+        "result_key_required": true,
+        "description": "count the number of objects using either a category or a specific item in a waypoint. This action has a result to tell. Store the result in 'result_key' to reference it later with '<result:key>'."
     },
     {
         "name": "count_people",
@@ -65,11 +66,21 @@
             }
         },
         "arg_case": "oneOf",
-        "description": "count the number of people in a waypoint using either color or arm gesture or body posture or none of this parameters. This action has a result to tell."
+        "result_key_required": true,
+        "description": "count the number of people in a waypoint using either color or arm gesture or body posture or none of this parameters. This action has a result to tell. Store the result in 'result_key' to reference it later with '<result:key>'."
     },
     {
         "name": "find_object",
         "args": {
+            "search_by": {
+                "type": "string",
+                "choices": [
+                    "specific_item",
+                    "category",
+                    "object",
+                    "undefined"
+                ]
+            },
             "size": {
                 "type": "string",
                 "choices": [
@@ -96,7 +107,8 @@
             }
         },
         "arg_case": "anyOf",
-        "description": "identify, search for, or find an object in a waypoint using either size or weight, or by item name or category. 'category' and 'specific_item' are mutually exclusive, as are 'size' and 'weight.'"
+        "result_key_required": true,
+        "description": "identify, search for, or find an object in a waypoint using either size or weight, or by item name or category. It can be used to determine its size and weight. 'category' and 'specific_item' are mutually exclusive, as are 'size' and 'weight.' This action has a result to tell. Store the result in 'result_key' to reference it later with '<result:key>'."
     },
     {
         "name": "pick_object",
@@ -173,7 +185,8 @@
             }
         },
         "arg_case": "oneOf",
-        "description": "identify, locate, meet, look for, search for or find one person in a waypoint using either color or arm gesture or name or body posture or without defining any of these parameters. Can find an previously found person."
+        "result_key_required": true,
+        "description": "identify, locate, meet, look for, search for or find one person in a waypoint using either color or arm gesture or name or body posture or without defining any of these parameters. Can find an previously found person. Store the result in 'result_key' to reference it later with '<result:key>'."
     },
     {
         "name": "describe_person",
@@ -188,7 +201,8 @@
             }
         },
         "arg_case": "allOf",
-        "description": "describe or obtain the body posture or name or the arm gesture of a person in a waypoint. This action has a result to tell."
+        "result_key_required": true,
+        "description": "describe or obtain the body posture or name or the arm gesture of a person in a waypoint. This action has a result to tell. Store the result in 'result_key' to reference it later with '<result:key>'."
     },
     {
         "name": "follow_person",
@@ -228,7 +242,7 @@
             }
         },
         "arg_case": "allOf",
-        "description": "speak or tell something in a waypoint. To speak to a person, you need to find it first. You can refer to the result of a previous action using '<result>' or speaking a fact like datetime, day of the week, team affiliation, nationality, or your name."
+        "description": "speak or tell something in a waypoint. To speak to a person, you need to find it first. You can refer to the stored result of a previous action using '<result:key>' where key is the result_key used in that action, or speaking a fact like datetime, day of the week, team affiliation, nationality, or your name."
     },
     {
         "name": "move_to",

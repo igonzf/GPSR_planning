@@ -13,11 +13,11 @@
                         distance="6.28"
                         axis="z"/>
                     </Delay>
-                    <Condition ID="CountPeople" confidence="0.6" cam_frame="head_front_camera_color_optical_frame" max_entities="15" gesture="{arm_gesture}" color="{color}" pose="{body_posture}" input_num_person="{result}" num_person="{result}" />
+                    <Condition ID="CountPeople" confidence="0.6" cam_frame="head_front_camera_color_optical_frame" max_entities="15" gesture="{arm_gesture}" color="{color}" pose="{body_posture}" input_num_person="{result_key}" num_person="{result_key}" />
                 </Sequence>
             </Repeat>
             <!-- <SetBlackboard output_key="result" value="{result_int}"/> -->
-            <Action ID="Speak" say_text="I have detected " param="{result}" />
+            <Action ID="Speak" say_text="I have detected " param="{result_key}" />
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->

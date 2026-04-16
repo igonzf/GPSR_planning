@@ -22,7 +22,7 @@
                             </ReactiveFallback>
                         </Sequence>
                     </RetryUntilSuccessful>
-                    <Action ID="CheckPolicy" question="<__media__>
+                    <Action ID="CheckPolicy" question="&lt;__media__&gt;
                                                         Start the answer with: 'the person is'.
 
                                                         Describe the person focusing mainly on their body posture, gestures, and current action.
@@ -31,14 +31,14 @@
                                                         - arm gestures (e.g., pointing left/right, waving, raising an arm),
                                                         - what the person is doing or expressing.
 
-                                                        Also include 1–2 brief physical details (e.g., clothing color or hair), but do NOT focus too much on appearance.
+                                                        Also include 1-2 brief physical details (e.g., clothing color or hair), but do NOT focus too much on appearance.
 
                                                         Use natural language only.
                                                         Do NOT output JSON, lists, or bullet points.
                                                         Return ONE single concise sentence."
-                                        output_text="{description}"
+                                        output_text="{result_key}"
                                         image_topic="/all_perceptions"/>
-                    <Action ID="Speak" say_text="So, " param="{description}"/>
+                    <Action ID="Speak" say_text="So, " param="{result_key}"/>
                 </Sequence>
             </RetryUntilSuccessful>
         </Sequence>
@@ -64,6 +64,11 @@
             <input_port default="person" name="person_id"></input_port>
             <input_port name="interest"></input_port>
             <output_port name="description"></output_port>
+        </Action>
+        <Action ID="CheckPolicy">
+            <input_port name="question"/>
+            <input_port name="output_text"/>
+            <input_port name="image_topic"/>
         </Action>
     </TreeNodesModel>
     <!-- ////////// -->
