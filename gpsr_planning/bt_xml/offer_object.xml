@@ -4,11 +4,13 @@
     <BehaviorTree ID="OfferObjectTree">
         <Sequence>
             <!-- <Action ID="MoveTo" is_truncated="true"  distance_tolerance="1.2" tf_frame="{location}"/> -->
-            <Action ID="MoveToPredefined" pose="offer" group_name="arm_torso"/>
+            <Action ID="PlayMotionPredefined" motion_name="offer"/>
             <Action ID="Speak" param="" say_text="please take the object from my gripper"/>
             <Delay delay_msec="140">
-                <Action ID="MoveToPredefined" pose="open" group_name="gripper"/>
+                <Action ID="PlayMotionPredefined" motion_name="open"/>
             </Delay>
+            <Action ID="PlayMotionPredefined" motion_name="close"/>
+            <Action ID="PlayMotionPredefined" motion_name="home"/>
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->

@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
-<root main_tree_to_execute="PickObjecTree">
+<root main_tree_to_execute="PickObjectTree">
     <!-- ////////// -->
-    <BehaviorTree ID="PickObjecTree">
+    <BehaviorTree ID="PickObjectTree">
         <Sequence>
-            <Action ID="SetPerceptionModel" model_type="object"/>
+            <Action ID="SwitchYoloModel" model="yolo11n.pt"/> 
             <RetryUntilSuccessful num_attempts="-1">
                 <Sequence>
                     <Condition ID="IsDetected" cam_frame="head_front_camera_rgb_optical_frame"
