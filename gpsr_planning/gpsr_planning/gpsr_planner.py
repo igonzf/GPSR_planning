@@ -37,12 +37,29 @@ class GpsrPlanner:
 
     def __init__(
         self,
-        robot_actions_path: str = "robot_actions.json",
-        waypoints_path: str = "waypoints.json"
+        robot_actions_path: str = "robot_actions_template.json",
+        waypoints_path: str = "waypoints.json",
+        objects_path: str = "objects.json",
+        names_path: str = "names.json"
     ) -> None:
 
         self.robot_actions = json.load(open(robot_actions_path))
         self.waypoints_path = waypoints_path
+
+        # Load data files for $ref definitions
+        with open(objects_path) as f:
+            obj_data = json.load(f)
+        with open(waypoints_path) as f:
+            wp_data = json.load(f)
+        with open(names_path) as f:
+            names_data = json.load(f)
+
+        self.placeholder_values = {
+            "<items>": sorted([o.replace(" ", "_") for o in obj_data['items']]),
+            "<categories>": sorted([c.replace(" ", "_") for c in obj_data['categories']]),
+            "<waypoints>": sorted([w.replace(" ", "_") for w in wp_data]),
+            "<names>": sorted(names_data['names'])
+        }
 
         self.create_grammar()
         # self.load_waypoints()
@@ -54,6 +71,9 @@ class GpsrPlanner:
             min_p=0,
             grammar_schema=self.grammar_schema
         )
+        
+        print("Grammar schema:")
+        print(self.grammar_schema)
 
         is_lora_added = False
 
@@ -145,53 +165,111 @@ class GpsrPlanner:
     def create_grammar(self) -> None:
         self.actions_descriptions = ""
         actions_refs = []
-        for robot_act in self.robot_actions:
-            self.actions_descriptions += f"- {robot_act['name']}: {robot_act['description']}\n"
-            actions_refs.append({"$ref": f"#/definitions/{robot_act['name']}"})
 
+        # Map placeholder strings to $defs names
+        placeholder_to_def = {
+            "<items>": "items",
+            "<categories>": "categories",
+            "<waypoints>": "waypoints",
+            "<names>": "names"
+        }
+
+        # Build $defs from data files
+        schema_defs = {}
+        for placeholder, def_name in placeholder_to_def.items():
+            schema_defs[def_name] = {
+                "type": "string",
+                "enum": self.placeholder_values[placeholder]
+            }
+
+        # Collect inline choice arrays and deduplicate by value
+        inline_defs = {}  # tuple(choices) -> def_name
+        def_names_used = set(schema_defs.keys())
+
+        for robot_act in self.robot_actions:
+            for arg_name, arg_def in robot_act['args'].items():
+                if 'choices' in arg_def and isinstance(arg_def['choices'], list):
+                    key = tuple(arg_def['choices'])
+                    if key not in inline_defs:
+                        name = arg_name
+                        if name in def_names_used:
+                            name = f"{robot_act['name']}_{arg_name}"
+                        inline_defs[key] = name
+                        def_names_used.add(name)
+
+        for choices, def_name in inline_defs.items():
+            schema_defs[def_name] = {
+                "type": "string",
+                "enum": list(choices)
+            }
+
+        # Helper: resolve choices to a $ref
+        def choices_to_ref(choices):
+            if isinstance(choices, str) and choices in placeholder_to_def:
+                return {"$ref": f"#/$defs/{placeholder_to_def[choices]}"}
+            elif isinstance(choices, list):
+                key = tuple(choices)
+                if key in inline_defs:
+                    return {"$ref": f"#/$defs/{inline_defs[key]}"}
+            return {"type": "string", "enum": choices}
+
+        # Build action definitions using $ref
         action_definitions = {}
         for robot_act in self.robot_actions:
+            self.actions_descriptions += f"- {robot_act['name']}: {robot_act['description']}\n"
+            actions_refs.append({"$ref": f"#/$defs/{robot_act['name']}"})
+
             action_args = {
                 "type": "object",
                 "properties": {},
                 "required": []
             }
 
-            if robot_act['arg_case'] == 'allOf' and len(robot_act['args'].keys()) != 0:                            
+            if robot_act['arg_case'] == 'allOf' and len(robot_act['args'].keys()) != 0:
                 for arg in robot_act["args"]:
-                    action_args['properties'][arg] = {"type": robot_act["args"][arg]["type"]}
-                    action_args['required'].append(arg)
                     if "choices" in robot_act["args"][arg]:
-                        action_args["properties"][arg]["enum"] = robot_act["args"][arg]["choices"]
+                        action_args["properties"][arg] = choices_to_ref(robot_act["args"][arg]["choices"])
+                    else:
+                        prop = {"type": robot_act["args"][arg]["type"]}
+                        for attr in ("minLength", "maxLength"):
+                            if attr in robot_act["args"][arg]:
+                                prop[attr] = robot_act["args"][arg][attr]
+                        action_args["properties"][arg] = prop
+                    action_args['required'].append(arg)
                 if 'result_key_required' in robot_act and robot_act['result_key_required']:
                     action_args['properties']['result_key'] = {"type": "string"}
                     action_args['required'].append('result_key')
-                
+
             elif robot_act['name'] == 'find_object':
                 action_args['oneOf'] = []
-                
-                item_list = {'item': ['category', 'specific_item'], 'category': ['category'], 'none': []}
-                size_list = ['size', 'weight']
-                
-                args_obj = {}
+
+                item_list = {'item': ['category', 'specific_item'], 'specific_item': ['specific_item'], 'category': ['category'], 'none': []}
+                size_list = {'size': ['size'], 'weight': ['weight'], 'none': []}
+
+                args_ref = {}
                 for arg in robot_act["args"]:
-                    args_obj[arg] = {"type": robot_act["args"][arg]["type"], "enum": robot_act["args"][arg]["choices"]}
-                
+                    if "choices" in robot_act["args"][arg]:
+                        args_ref[arg] = choices_to_ref(robot_act["args"][arg]["choices"])
+
                 for item, size in product(list(item_list.keys()), size_list):
+                    if item == 'none' and size == 'none':
+                        continue
+                    props = {k: args_ref[k] for k in [*item_list[item], *size_list[size]]}
                     action_to_add = {
-                        "properties": {k: args_obj[k] for k in [*item_list[item], size]},
-                        "required": list(item_list[item])
+                        "properties": props,
+                        "required": list(item_list[item]) + list(size_list[size])
                     }
                     if 'result_key_required' in robot_act and robot_act['result_key_required']:
                         action_to_add['properties']['result_key'] = {"type": "string"}
-                        action_to_add['required'].append('result_key')
+                        action_to_add['required'].insert(0, 'result_key')
                     action_args['oneOf'].append(action_to_add)
 
             elif robot_act['arg_case'] == 'anyOf':
                 for arg in robot_act["args"]:
-                    action_args['properties'][arg] = {"type": robot_act["args"][arg]["type"]}
                     if "choices" in robot_act["args"][arg]:
-                        action_args["properties"][arg]["enum"] = robot_act["args"][arg]["choices"]
+                        action_args['properties'][arg] = choices_to_ref(robot_act["args"][arg]["choices"])
+                    else:
+                        action_args['properties'][arg] = {"type": robot_act["args"][arg]["type"]}
 
                 if 'result_key_required' in robot_act and robot_act['result_key_required']:
                     action_args['properties']['result_key'] = {"type": "string"}
@@ -201,7 +279,7 @@ class GpsrPlanner:
                 action_args['oneOf'] = []
                 del action_args['properties']
                 del action_args['required']
-                
+
                 for search_by_option in robot_act['args']['search_by']['choices']:
                     option_obj = {
                         "properties": {
@@ -211,13 +289,12 @@ class GpsrPlanner:
                         },
                         "required": ['search_by']
                     }
-                    
+
                     if search_by_option != 'none':
-                        option_obj['properties'][search_by_option] = {
-                            'type': robot_act['args'][search_by_option]['type'],
-                            'enum': robot_act['args'][search_by_option]['choices']
-                        }
-                        
+                        option_obj['properties'][search_by_option] = choices_to_ref(
+                            robot_act['args'][search_by_option]['choices']
+                        )
+
                     # idk if we should let this here
                     if 'previously_found' in robot_act['args']:
                         # option_obj["required"].append('previously_found')
@@ -225,13 +302,13 @@ class GpsrPlanner:
                             'type': 'boolean'
                         }
                         option_obj['required'].append(search_by_option)
-                    
+
                     if 'result_key_required' in robot_act and robot_act['result_key_required']:
                         option_obj['properties']['result_key'] = {"type": "string"}
                         option_obj['required'].append('result_key')
-                
+
                     action_args['oneOf'].append(option_obj)
-            
+
             action_def = {
                 "type": "object",
                 "properties": {
@@ -243,12 +320,11 @@ class GpsrPlanner:
                 },
                 "required": ['explanation_of_next_actions', robot_act['name']]
             }
-            
+
             action_definitions[robot_act["name"]] = action_def
 
-
         self.grammar_schema = json.dumps({
-            "definitions": action_definitions,
+            "$defs": {**schema_defs, **action_definitions},
             "type": "object",
             "properties": {
                 "actions": {

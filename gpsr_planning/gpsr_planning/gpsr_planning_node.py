@@ -18,13 +18,16 @@ class GpsrPlanningNode(Node):
     def __init__(self) -> None:
         super().__init__("gpsr_planning_node")
 
-        robot_actions_path = ament_index_python.get_package_share_directory(
-            "gpsr_planning") + "/params/robot_actions.json"
+        pkg_share = ament_index_python.get_package_share_directory(
+            "gpsr_planning")
 
-        waypoints_path = ament_index_python.get_package_share_directory(
-            "gpsr_planning") + "/params/waypoints.json"
+        robot_actions_path = pkg_share + "/params/robot_actions_template.json"
+        waypoints_path = pkg_share + "/params/waypoints.json"
+        objects_path = pkg_share + "/params/objects.json"
+        names_path = pkg_share + "/params/names.json"
 
-        self.gpsr_planner = GpsrPlanner(robot_actions_path, waypoints_path)
+        self.gpsr_planner = GpsrPlanner(
+            robot_actions_path, waypoints_path, objects_path, names_path)
         self._srv = self.create_service(
             GeneratePlan, "gpsr_planning", self._execute_cb,
             callback_group=ReentrantCallbackGroup())
@@ -63,10 +66,10 @@ class GpsrPlanningNode(Node):
             action_name = list(action.keys())[1]
             action_args = action[action_name]
 
-            if action_name == "find_person" and "name" == action_args["search_by"]:
+            if action_name == "find_person" and "search_by" in action_args and action_args["search_by"] == "name":
                 action_name = "find_person_by_name"
-            
-            if action_name == "describe_person" and "interest" == 'name':
+
+            if action_name == "describe_person" and "interest" in action_args and action_args["interest"] == "name":
                 action_name = "describe_person_by_name"
                 
             action_element = bt_xml.createElement("SubTree")
