@@ -3,6 +3,8 @@
     <!-- ////////// -->
     <BehaviorTree ID="DescribePersonTree">
         <Sequence>
+            <Action ID="ChangeLifecycleState" node_name="llama" />
+
             <RetryUntilSuccessful num_attempts="1000">
                 <Sequence>
                     <RetryUntilSuccessful num_attempts="-1">
@@ -42,7 +44,8 @@
                 </Sequence>
             </RetryUntilSuccessful>
 
-            <Action ID="SetBlackboard" output_key="{result_key}" value="{result}"/>
+            <Action ID="SetBlackboard" output_key="{result_key}" value="{result}" />
+            <Action ID="ChangeLifecycleState" node_name="llama" deactivate="true" />
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->
