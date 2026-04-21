@@ -10,8 +10,9 @@
                         <Condition ID="IsDetected" confidence="0.6" frames="{frames}" interest="{specific_item}" max_depth="5" max_entities="10" order="depth_nearest"/>
                         <Action ID="Pan" period="10.0" range="30" pitch_angle="-10"/>
                     </ReactiveFallback>
-                    <Action ID="FilterObject" frames="{frames}" size="{size}" weight="{weight}" class="{category}" filtered_object="{result_key}"/>
-                    <Action ID="Speak" say_text="I find a " param="{result_key}"/>
+                    <Action ID="FilterObject" frames="{frames}" size="{size}" weight="{weight}" class="{category}" filtered_object="{result}"/>
+                    <Action ID="Speak" say_text="I find a " param="{result}"/>
+                    <Action ID="SetBlackboard" output_key="{result_key}" value="{result}"/>
                 </Sequence>
             </RetryUntilSuccessful>
         </Sequence>

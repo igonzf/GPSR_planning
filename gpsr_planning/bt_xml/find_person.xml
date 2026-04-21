@@ -61,7 +61,7 @@
                                 </RetryUntilSuccessful>
                                 <Action ID="FilterEntity" frame="person_0" lambda="0.05" />
                                 <Action ID="Query" text="{text_value}" intention="name"
-                                    intention_value="{result_key}" />
+                                    intention_value="{result}" />
                             </ReactiveSequence>
 
                             <ReactiveSequence>
@@ -70,7 +70,7 @@
                                         max_depth="3" max_entities="1" order="depth_nearest" />
                                 </RetryUntilSuccessful>
                                 <Action ID="FilterEntity" frame="person_0" lambda="0.05" />
-                                <Action ID="Speak" say_text="So you are" param="{result_key}" />
+                                <Action ID="Speak" say_text="So you are" param="{result}" />
                                 <Action ID="Speak" say_text="Please say yes or no" />
                             </ReactiveSequence>
 
@@ -81,6 +81,7 @@
                                 <Action ID="FilterEntity" frame="person_0" lambda="0.05"/>
                                 <Action ID="DialogConfirmation" />
                             </ReactiveSequence>
+                            <Action ID="SetBlackboard" output_key="{result_key}" value="{result}"/>
                         </Sequence>
                     </RetryUntilSuccessful>
                 </Fallback>

@@ -38,7 +38,8 @@
                                                         Return ONE single concise sentence."
                                         output_text="{result_key}"
                                         image_topic="/all_perceptions"/>
-                    <Action ID="Speak" say_text="So, " param="{result_key}"/>
+                    <Action ID="Speak" say_text="So, " param="{result}"/>
+                    <Action ID="SetBlackboard" output_key="{result_key}" value="{result}"/>
                 </Sequence>
             </RetryUntilSuccessful>
         </Sequence>
