@@ -3,7 +3,8 @@
     <!-- ////////// -->
     <BehaviorTree ID="FindPersonByNameTree">
         <Sequence>
-            <Action ID="SetPerceptionModel" model_type="object"/>
+            <Action ID="ChangeLifecycleState" node_name="yolo" />
+            <Action ID="SwitchYoloModel" model="yolov8n-pose"/>
             <Action ID="SetHeadJointPosition" vertical="0.0"/>
             <Action ID="SetTorsoHeight" height="0.12"/>
             <Action ID="InitProtectedQueue" port="prev_frames"/>
@@ -63,6 +64,7 @@
                 <Action ID="Speak" say_text="I found you, " param="{name}"/>
             </BlackboardCheckString>
             <Action ID="SetBlackboard" output_key="{result_key}" value="{name}"/>
+            <Action ID="ChangeLifecycleState" node_name="yolo" deactivate="true"/>
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->

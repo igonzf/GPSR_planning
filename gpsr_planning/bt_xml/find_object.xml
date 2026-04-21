@@ -3,6 +3,7 @@
     <!-- ////////// -->
     <BehaviorTree ID="FindObjectTree">
         <Sequence>
+            <Action ID="ChangeLifecycleState" node_name="yolo" />
             <Action ID="SwitchYoloModel" model="yolo11n.pt"/> 
             <RetryUntilSuccessful num_attempts="1000">
                 <Sequence>
@@ -15,6 +16,7 @@
                     <Action ID="SetBlackboard" output_key="{result_key}" value="{result}"/>
                 </Sequence>
             </RetryUntilSuccessful>
+            <Action ID="ChangeLifecycleState" node_name="yolo" deactivate="true"/>
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->

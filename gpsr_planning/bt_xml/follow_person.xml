@@ -3,6 +3,7 @@
     <!-- ////////// -->
     <BehaviorTree ID="FollowPersonTree">
         <Sequence>
+            <Action ID="ChangeLifecycleState" node_name="yolo" />
             <Action ID="SwitchYoloModel" model="yolov11n"/>
             <Action ID="Speak" param="" say_text="Now i will follow you. Please stop at the end "/>
             <RetryUntilSuccessful num_attempts="-1">
@@ -67,6 +68,7 @@
                     </ReactiveSequence>
                 </Sequence>
             </RetryUntilSuccessful>
+            <Action ID="ChangeLifecycleState" node_name="yolo" deactivate="true"/>
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->

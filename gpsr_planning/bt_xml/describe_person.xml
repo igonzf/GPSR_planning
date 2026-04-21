@@ -39,9 +39,10 @@
                                         output_text="{result_key}"
                                         image_topic="/all_perceptions"/>
                     <Action ID="Speak" say_text="So, " param="{result}"/>
-                    <Action ID="SetBlackboard" output_key="{result_key}" value="{result}"/>
                 </Sequence>
             </RetryUntilSuccessful>
+
+            <Action ID="SetBlackboard" output_key="{result_key}" value="{result}"/>
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->

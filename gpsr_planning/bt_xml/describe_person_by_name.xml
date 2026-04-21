@@ -3,6 +3,9 @@
     <!-- ////////// -->
     <BehaviorTree ID="DescribePersonByNameTree">
         <Sequence>
+            <Action ID="ChangeLifecycleState" node_name="yolo" />
+            <Action ID="SwitchYoloModel" model="yolov8n-pose"/>
+
             <RetryUntilSuccessful num_attempts="10000">
                 <Sequence>
                     <ReactiveSequence>
@@ -57,9 +60,10 @@
                         <Action ID="FilterEntity" frame="person_0" lambda="0.05"/> 
                         <Action ID="DialogConfirmation" />
                     </ReactiveSequence>
-                    <Action ID="SetBlackboard" output_key="{result_key}" value="{result}"/>
                 </Sequence>
             </RetryUntilSuccessful>
+            <Action ID="SetBlackboard" output_key="{result_key}" value="{result}"/>
+            <Action ID="ChangeLifecycleState" node_name="yolo" deactivate="true"/>
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->

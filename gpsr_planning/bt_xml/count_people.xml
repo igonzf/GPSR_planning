@@ -4,9 +4,10 @@
     <BehaviorTree ID="CountPeopleTree">
         <Sequence>
             <Action ID="SetBlackboardInt" output_key="result_int" value="0"/>
+            <Action ID="ChangeLifecycleState" node_name="yolo" />
+            <Action ID="SwitchYoloModel" model="yolov8n-pose"/>
             <Repeat num_cycles="4">
                 <Sequence>
-                    <Action ID="SwitchYoloModel" model="yolov8n-pose"/>
                     <Delay delay_msec="1000">
                         <Action ID="MoveAlongAxis" 
                         speed="0.5"
@@ -18,6 +19,7 @@
             </Repeat>
             <Action ID="Speak" say_text="I have detected " param="{result}" />
             <SetBlackboard output_key="{result_key}" value="{result}"/>
+            <Action ID="ChangeLifecycleState" node_name="yolo" deactivate="true"/>
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->
