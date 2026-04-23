@@ -39,12 +39,14 @@ class GpsrPlanningNode(Node):
         plan, _ = self.gpsr_planner.send_prompt(request.command)
         self.get_logger().info(json.dumps(plan, indent=4))
 
-        for action in plan["actions"]:
-            action_name = list(action.keys())[1]
-            response.action_list.append(action_name)
-
         response.bt_xml = self.action_parser(plan)
         response.plan_json = json.dumps(plan, indent=4)
+
+        for action in plan["actions"]:
+            action_name = list(action.keys())[1]
+            action_description = f"Reasoning: {action['explaination_of_next_actions']}"
+            response.action_list.append(action_description)
+
         self.get_logger().info(response.bt_xml)
 
         return response
