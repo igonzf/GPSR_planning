@@ -3,8 +3,8 @@
     <!-- ////////// -->
     <BehaviorTree ID="PickObjectTree">
         <Sequence>
-            <Action ID="SwitchYoloModel" model="yolo11n.pt"/> 
-            <RetryUntilSuccessful num_attempts="-1">
+            <!-- <Action ID="SwitchYoloModel" model="/home/robotica/cs4home_ws/src/thirdparty/robocup24/robocup_bringup/models/objects26.pt"/>  -->
+            <!-- <RetryUntilSuccessful num_attempts="-1">
                 <Sequence>
                     <Condition ID="IsDetected" cam_frame="head_front_camera_rgb_optical_frame"
                                                         confidence="0.6"
@@ -17,13 +17,16 @@
                     <Action ID="ExtractObjectsFromScene" interest_class="{result}" detected_objects="{detected_objects}" objects_count="{objects_count}"/>
                     <Action ID="GenerateTextFromObjects" detected_objects="{detected_objects}" output_text="{out_msg}" selected_object="{selected_object}" />
                 </Sequence>
-            </RetryUntilSuccessful>
-            <Action ID="Speak" say_text="I am detecting a " param="{out_msg}"/>
-            <Action ID="Speak" say_text="Trying to pick it" param=""/>
-            <RetryUntilSuccessful num_attempts="-1">
+            </RetryUntilSuccessful> -->
+            <!-- <Action ID="Speak" say_text="I am detecting a " param="{out_msg}"/> -->
+            <Action ID="Speak" say_text="Current I am not able to pick objects. Please take it for me." param=""/>
+            <Delay delay_msec="140">
+                <Action ID="PlayMotionPredefined" motion_name="open"/>
+            </Delay>
+            <!-- <RetryUntilSuccessful num_attempts="-1">
                 <Action ID="ExtractCollisionScene" selected_object="{selected_object}"/>
-            </RetryUntilSuccessful>
-            <Action ID="PickObject" object_to_pick="{selected_object}"/>
+            </RetryUntilSuccessful> -->
+            <!-- <Action ID="PickObject" object_to_pick="{selected_object}"/> -->
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->

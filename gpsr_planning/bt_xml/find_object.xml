@@ -3,8 +3,8 @@
     <!-- ////////// -->
     <BehaviorTree ID="FindObjectTree">
         <Sequence>
-            <Action ID="ChangeLifecycleState" node_name="yolo" />
-            <Action ID="SwitchYoloModel" model="yolo11n.pt"/> 
+            <Action ID="ChangeLifecycleState" node_name="/perception_people_detection" />
+            <Action ID="SwitchYoloModel" model="/home/robotica/cs4home_ws/src/thirdparty/robocup24/robocup_bringup/models/objects26.pt"/> 
             <RetryUntilSuccessful num_attempts="1000">
                 <Sequence>
                     <ReactiveFallback>
@@ -16,12 +16,12 @@
                     <Action ID="SetBlackboard" output_key="{result_key}" value="{result}"/>
                 </Sequence>
             </RetryUntilSuccessful>
-            <Action ID="ChangeLifecycleState" node_name="yolo" deactivate="true"/>
+            <Action ID="ChangeLifecycleState" node_name="/perception_people_detection" deactivate="true"/>
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->
     <TreeNodesModel>
-        <Condition ID="IsDetected">
+        <Condition ID="IsDetected"> 
             <input_port name="cam_frame"/>
             <input_port name="confidence"/>
             <input_port name="person_id"/>

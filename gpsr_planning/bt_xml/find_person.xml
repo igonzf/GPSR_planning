@@ -3,8 +3,9 @@
     <!-- ////////// -->
     <BehaviorTree ID="FindPersonTree">
         <Sequence>
-            <Action ID="ChangeLifecycleState" node_name="yolo" />
-            <Action ID="SwitchYoloModel" model="yolov8n-pose"/>
+            <Action ID="ChangeLifecycleState" node_name="/perception_people_detection" />
+
+            <Action ID="SwitchYoloModel" model="yolov8n-pose.pt"/>
             <Action ID="SetHeadJointPosition" vertical="-0.15"/>
             <Action ID="SetTorsoHeight" height="0.1"/>
 
@@ -12,11 +13,11 @@
                 <Sequence>
                     <ReactiveFallback>
                         <!-- <Condition ID="IsGesturing" type="{gesture}" person_id="{person_id}"/> -->
-                        <Condition ID="IsDetected" color="{color}" gesture="{arm_gesture}" pose="{body_position}" confidence="0.3" person_id="{person_id}" interest="person" max_depth="2.5" max_entities="1" order="color"/>
+                        <Condition ID="IsDetected" color="{color}" gesture="{arm_gesture}" pose="{body_posture}" confidence="0.3" person_id="{person_id}" interest="person" max_depth="2.5" max_entities="1" order="color" />
                         <Action ID="MoveAlongAxis" 
-                        speed="0.5"
-                        distance="6.28"
-                        axis="z"/>
+                            speed="0.2"
+                            distance="6.28"
+                            axis="z"/>
                     </ReactiveFallback>
                 <!-- TODO Si se hace el MoveTo, añadir el FilterEntity-->
                 <Action ID="Speak" say_text="I found you." param=""/>
@@ -24,69 +25,7 @@
             </RetryUntilSuccessful>
             <Action ID="SetHeadJointPosition" vertical="0.0"/>
             <Action ID="SetTorsoHeight" height="0.15"/>
-            <Fallback>
-                <BlackboardCheckString value_A="{search_by}" value_B="name" return_on_mismatch="FAILURE">
-                    <Action ID="AlwaysSuccess"/>
-                </BlackboardCheckString>
-                <RetryUntilSuccessful num_attempts="10000">
-                    <Sequence>
-                        <ReactiveSequence>
-                            <RetryUntilSuccessful num_attempts="-1">
-                                <Condition ID="IsDetected" confidence="0.6" interest="person" frames=""
-                                    max_depth="3" max_entities="1" order="depth_nearest" />
-                            </RetryUntilSuccessful>
-                            <Action ID="FilterEntity" frame="person_0" lambda="0.05" />
-                            <Action ID="Speak" say_text="What's your name?" />
-                        </ReactiveSequence>
-                        <ReactiveSequence>
-                            <RetryUntilSuccessful num_attempts="-1">
-                                <Condition ID="IsDetected" confidence="0.6" interest="person" frames=""
-                                    max_depth="3" max_entities="1" order="depth_nearest" />
-                            </RetryUntilSuccessful>
-                            <Action ID="FilterEntity" frame="person_0" lambda="0.05" />
-                        </ReactiveSequence>
-
-                        <ReactiveSequence>
-                            <RetryUntilSuccessful num_attempts="-1">
-                                <Condition ID="IsDetected" confidence="0.6" interest="person" frames=""
-                                    max_depth="3" max_entities="1" order="depth_nearest" />
-                            </RetryUntilSuccessful>
-                            <Action ID="FilterEntity" frame="person_0" lambda="0.05" />
-                            <Action ID="Listen" listen_text="{text_value}" />
-                        </ReactiveSequence>
-
-                        <ReactiveSequence>
-                            <RetryUntilSuccessful num_attempts="-1">
-                                <Condition ID="IsDetected" confidence="0.6" interest="person" frames=""
-                                    max_depth="3" max_entities="1" order="depth_nearest" />
-                            </RetryUntilSuccessful>
-                            <Action ID="FilterEntity" frame="person_0" lambda="0.05" />
-                            <Action ID="Query" text="{text_value}" intention="name"
-                                intention_value="{result}" />
-                        </ReactiveSequence>
-
-                        <ReactiveSequence>
-                            <RetryUntilSuccessful num_attempts="-1">
-                                <Condition ID="IsDetected" confidence="0.6" interest="person" frames=""
-                                    max_depth="3" max_entities="1" order="depth_nearest" />
-                            </RetryUntilSuccessful>
-                            <Action ID="FilterEntity" frame="person_0" lambda="0.05" />
-                            <Action ID="Speak" say_text="So you are" param="{result}" />
-                            <Action ID="Speak" say_text="Please say yes or no" />
-                        </ReactiveSequence>
-
-                        <ReactiveSequence>
-                            <RetryUntilSuccessful num_attempts="-1">
-                                <Condition ID="IsDetected" confidence="0.6" interest="person" frames="" max_depth="3" max_entities="1" order="depth_nearest"/>
-                            </RetryUntilSuccessful>
-                            <Action ID="FilterEntity" frame="person_0" lambda="0.05"/>
-                            <Action ID="DialogConfirmation" />
-                        </ReactiveSequence>
-                        <Action ID="SetBlackboard" output_key="{result_key}" value="{result}"/>
-                    </Sequence>
-                </RetryUntilSuccessful>
-            </Fallback>
-            <Action ID="ChangeLifecycleState" node_name="yolo" deactivate="true"/>
+            <Action ID="ChangeLifecycleState" node_name="/perception_people_detection" deactivate="true"/>
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->

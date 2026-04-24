@@ -3,8 +3,8 @@
     <!-- ////////// -->
     <BehaviorTree ID="CountObjectTree">
         <Sequence>
-            <Action ID="ChangeLifecycleState" node_name="yolo" />
-            <Action ID="SwitchYoloModel" model="yolo11n.pt"/> 
+            <Action ID="ChangeLifecycleState" node_name="/perception_people_detection" />
+            <Action ID="SwitchYoloModel" model="/home/robotica/cs4home_ws/src/thirdparty/robocup24/robocup_bringup/models/objects26.pt"/> 
             <RetryUntilSuccessful num_attempts="3000">
                 <Sequence>
                     <Condition ID="IsDetected"          
@@ -23,7 +23,7 @@
             <Action ID="Speak" say_text="I am detecting " param="{result}"/>
             <Action ID="Speak" say_text="{out_msg}" param=""/>
             <Action ID="SetBlackboard" output_key="{result_key}" value="{result}"/>
-            <Action ID="ChangeLifecycleState" node_name="yolo" deactivate="true"/>
+            <Action ID="ChangeLifecycleState" node_name="/perception_people_detection" deactivate="true"/>
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->

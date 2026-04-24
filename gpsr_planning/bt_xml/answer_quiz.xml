@@ -3,7 +3,7 @@
     <!-- ////////// -->
     <BehaviorTree ID="AnswerQuizTree">
         <Sequence>
-            <Action ID="ChangeLifecycleState" node_name="llama" />
+            <Action ID="ChangeLifecycleState" node_name="/llama/llava_node" />
             <Action ID="Speak" say_text="I am ready to answer your questions" param=""/>
             <RetryUntilSuccessful num_attempts="2">
                 <Sequence>
@@ -20,7 +20,7 @@
                     <Action ID="Speak" say_text="{answer_value}"/>
                 </Sequence>
             </RetryUntilSuccessful>
-            <Action ID="ChangeLifecycleState" node_name="llama" deactivate="true"/>
+            <Action ID="ChangeLifecycleState" node_name="/llama/llava_node" deactivate="true"/>
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->

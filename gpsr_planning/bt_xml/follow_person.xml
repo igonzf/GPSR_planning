@@ -3,8 +3,8 @@
     <!-- ////////// -->
     <BehaviorTree ID="FollowPersonTree">
         <Sequence>
-            <Action ID="ChangeLifecycleState" node_name="yolo" />
-            <Action ID="SwitchYoloModel" model="yolov11n"/>
+            <Action ID="ChangeLifecycleState" node_name="/perception_people_detection" />
+            <Action ID="SwitchYoloModel" model="yolov11n-pose.pt"/>
             <Action ID="Speak" param="" say_text="Now i will follow you. Please stop at the end "/>
             <RetryUntilSuccessful num_attempts="-1">
                 <Condition ID="IsDetected" 
@@ -68,7 +68,7 @@
                     </ReactiveSequence>
                 </Sequence>
             </RetryUntilSuccessful>
-            <Action ID="ChangeLifecycleState" node_name="yolo" deactivate="true"/>
+            <Action ID="ChangeLifecycleState" node_name="/perception_people_detection" deactivate="true"/>
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->

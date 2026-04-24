@@ -3,8 +3,9 @@
     <!-- ////////// -->
     <BehaviorTree ID="DescribePersonByNameTree">
         <Sequence>
-            <Action ID="ChangeLifecycleState" node_name="yolo" />
-            <Action ID="SwitchYoloModel" model="yolov8n-pose"/>
+            <Action ID="ChangeLifecycleState" node_name="/perception_people_detection" />
+            <Action ID="ChangeLifecycleState" node_name="/llama/llava_node" />
+            <Action ID="SwitchYoloModel" model="yolov8n-pose.pt"/>
 
             <RetryUntilSuccessful num_attempts="10000">
                 <Sequence>
@@ -63,7 +64,8 @@
                 </Sequence>
             </RetryUntilSuccessful>
             <Action ID="SetBlackboard" output_key="{result_key}" value="{result}"/>
-            <Action ID="ChangeLifecycleState" node_name="yolo" deactivate="true"/>
+            <Action ID="ChangeLifecycleState" node_name="/perception_people_detection" deactivate="true"/>
+            <Action ID="ChangeLifecycleState" node_name="/llama/llava_node" deactivate="true"/>
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->
